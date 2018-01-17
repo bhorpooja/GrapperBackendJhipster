@@ -3,15 +3,19 @@ package com.melayer.grapper;
 import com.melayer.grapper.config.ApplicationProperties;
 import com.melayer.grapper.config.DefaultProfileUtil;
 
+import com.melayer.grapper.storage.StorageProperties;
+import com.melayer.grapper.storage.StorageService;
 import io.github.jhipster.config.JHipsterConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.*;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
@@ -23,7 +27,7 @@ import java.util.Collection;
 
 @ComponentScan
 @EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
-@EnableConfigurationProperties({ApplicationProperties.class})
+@EnableConfigurationProperties(value = {StorageProperties.class,ApplicationProperties.class})
 @EnableDiscoveryClient
 public class GrapperApp {
 
@@ -42,6 +46,7 @@ public class GrapperApp {
      * <p>
      * You can find more information on how profiles work with JHipster on <a href="http://www.jhipster.tech/profiles/">http://www.jhipster.tech/profiles/</a>.
      */
+
     @PostConstruct
     public void initApplication() {
         Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
@@ -61,6 +66,7 @@ public class GrapperApp {
      * @param args the command line arguments
      * @throws UnknownHostException if the local host name could not be resolved into an address
      */
+
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(GrapperApp.class);
         DefaultProfileUtil.addDefaultProfile(app);
@@ -86,5 +92,13 @@ public class GrapperApp {
         log.info("\n----------------------------------------------------------\n\t" +
                 "Config Server: \t{}\n----------------------------------------------------------",
             configServerStatus == null ? "Not found or not setup for this application" : configServerStatus);
+    }
+
+    @Bean
+    CommandLineRunner init(StorageService storageService){
+        return (args )-> {
+            //storageService.deleteAll();
+            storageService.init();
+        };
     }
 }
